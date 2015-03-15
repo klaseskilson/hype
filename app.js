@@ -10,6 +10,7 @@ var bodyParser = require('body-parser');
 
 // load our files
 var site = require('./site');
+var image = require('./image');
 
 // wooop
 var app = express();
@@ -29,6 +30,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // setup routes
 app.get('/', site.index);
+app.put('/image/create', image.create);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
