@@ -2,6 +2,8 @@ var fs = require('fs');
 var gm = require('gm');
 
 exports.create = function(req, res) {
+  console.log('post data!: ', req.body);
+
   var height = 600,
       width  = 600;
 

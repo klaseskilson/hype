@@ -1,3 +1,9 @@
 exports.index = function(req, res){
-  res.render('index', { title: 'Route Separation Example' });
+  console.log('logged in user: ', req.user);
+  if (req.user) {
+    res.render('loggedin', { name: req.user.displayName });
+
+  } else {
+    res.render('index', { title: 'Route Separation Example' });
+  }
 };
