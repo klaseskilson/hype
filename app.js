@@ -14,9 +14,8 @@ var passport = require('passport')
 // load env vars
 require('dotenv').load();
 
-// load our files
-var site = require('./site');
-var image = require('./image');
+// load routes
+var routes = require('./routes');
 
 // wooop
 var app = express();
@@ -31,8 +30,10 @@ app.use(logger('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(session({secret: 'keyboard catz'}));
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(session({secret: 'keyboard catz',
+                 saveUninitialized: true,
+                 resave: true}));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(require('stylus').middleware(path.join(__dirname, 'public')));
@@ -53,28 +54,14 @@ passport.use(new FacebookStrategy({
   },
   function(accessToken, refreshToken, profile, done) {
     console.log('granted!');
+    profile.accessToken = accessToken;
     done(null, profile);
   }
 ));
 
 // setup routes
-app.get('/', site.index);
-app.put('/image/create', image.create);
-// Redirect the user to Facebook for authentication.  When complete,
-// Facebook will redirect the user back to the application at
-//     /auth/facebook/callback
-app.get('/auth/facebook', passport.authenticate('facebook'));
-// Facebook will redirect the user to this URL after approval.  Finish the
-// authentication process by attempting to obtain an access token.  If
-// access was granted, the user will be logged in.  Otherwise,
-// authentication has failed.
-app.get('/auth/facebook/callback',
-  passport.authenticate('facebook', {successRedirect: '/',
-                                     failureRedirect: '/login'}));
-app.get('/logout', function(req, res){
-  req.logout();
-  res.redirect('/');
-});
+app.use('/', routes);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

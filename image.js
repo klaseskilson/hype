@@ -1,5 +1,14 @@
 var fs = require('fs');
 var gm = require('gm');
+var request = require('request');
+
+exports.view = function(req, res){
+  if (!req.user)
+    res.redirect('/');
+
+  console.log('logged in user: ', req.user);
+  res.render('loggedin', { name: req.user.displayName });
+};
 
 exports.create = function(req, res) {
   console.log('post data!: ', req.body);
