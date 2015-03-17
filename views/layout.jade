@@ -1,7 +1,9 @@
 doctype html
 html
   head
-    title= title
+    title= 'MTD2015 Hype'
     link(rel='stylesheet', href='/stylesheets/style.css')
-  body
+    script(src='https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js')
+    script(src='/javascripts/main.js')
+  body(ng-app='hypeApp')
     block content

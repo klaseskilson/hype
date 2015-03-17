@@ -89,7 +89,7 @@ exports.create = function(req, res) {
           // save time for science
           req.session.time = start.getTime();
           console.log('done! execution took ' + (end.getTime() - start.getTime()) + ' ms.');
-          res.json({image: 'public/images/output/' + req.user.id + '.png'});
+          res.json({image: '/images/output/' + req.user.id + '.png'});
         } else {
           console.log('An error occured!', err);
           res.status(500).json({ error: 'could not create image', err: err });
@@ -133,7 +133,7 @@ exports.upload = function(req, res) {
 
     response.on('end', function() {
       console.log(body);
-      res.json({image: body});
+      res.json({image: JSON.parse(body)});
     });
   });
 
