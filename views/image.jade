@@ -1,8 +1,16 @@
 extends layout
 
 block content
-  p Welcome, #{name}
+  section(ng-controller='ImageCtrl')
+    p
+      span(ng-if='loading') loading...
+    | Welcome, #{name}!
 
-  p
-    a(href='/logout') Logga ut!
-    img(src=image)
+    img(ng-if='img !== ""', src='{{img}}')
+
+    button(ng-if='img !== ""', ng-click='saveImage()') Save!
+
+    p
+      a(href='/logout') Logga ut!
+    p
+      img(src=image)
