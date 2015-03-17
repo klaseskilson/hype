@@ -9,11 +9,13 @@ exports.view = function(req, res) {
   if (!req.user)
     res.redirect('/');
 
-  var image = 'https://graph.facebook.com/v2.2/' + req.user.id + '/picture?height=600&width=600';
+  var remote_image = 'https://graph.facebook.com/v2.2/' + req.user.id + '/picture?height=600&width=600';
+
+  var localimage = '';
 
   console.log('logged in user: ', req.user);
-  console.log('user picture: ', image);
-  res.render('image', { name: req.user.displayName, image: image });
+  console.log('user picture: ', remote_image);
+  res.render('image', { name: req.user.displayName, image: remote_image });
 };
 
 exports.create = function(req, res) {
@@ -87,8 +89,10 @@ exports.create = function(req, res) {
           // save time for science
           req.session.time = start.getTime();
           console.log('done! execution took ' + (end.getTime() - start.getTime()) + ' ms.');
+          res.json({image: 'public/images/output/' + req.user.id + '.png'});
         } else {
           console.log('An error occured!', err);
+          res.status(500).json({ error: 'could not create image', err: err });
         }
       });
     }
@@ -101,10 +105,12 @@ exports.upload = function(req, res) {
 
   var filename = 'public/images/output/'+req.user.id + '.png'
 
+  // method from here: http://stackoverflow.com/a/24614863
   var form = new FormData(); //Create multipart form
   form.append('file', fs.createReadStream(filename)); //Put file
-  form.append('message', "Gaitooo"); //Put message
+  form.append('message', "Ready for MTD2015! http://hype.medieteknikdagarna.se"); //Put message
   form.append('no_story', 'true'); // don't publish upload as a feed story
+  form.append('privacy', JSON.stringify({'value': 'SELF'})); // make photo private
 
   var options = {
     method: 'post',
@@ -114,11 +120,20 @@ exports.upload = function(req, res) {
   };
 
   //Do POST request, callback for response
-  var request = https.request(options, function (res) {
-    console.log(res);
+  var request = https.request(options, function (response) {
+    console.log('response: ', response);
 
-    res.on('data', function(data) {
-      console.log('Data: ', data.id);
+    var body = '';
+
+    response.on('data', function(chunk) {
+      console.log('Data: ', chunk);
+      body += chunk;
+      // res.json({image: data});
+    });
+
+    response.on('end', function() {
+      console.log(body);
+      res.json({image: body});
     });
   });
 
