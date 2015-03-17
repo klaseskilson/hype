@@ -1,8 +1,17 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  main.c-modal
+    p
+      img(src='/images/logo.svg', class='c-logo c-logo--large')
+    p.lead
+      | Vi närmar oss årets händelse &ndash;&nbsp;
+      a(href="http://medieteknikdagarna.se") MTD 2015
+      | . Byt ut din profilbild för att maxa MTD-hypen, så ses vi 25-26 mars!
 
-  p
-    a(href='/auth/facebook') Logga in med Facebook
+    p
+      a(href='/auth/facebook', class='button')
+        i(class='fa fa-facebook-official')
+        | Logga in med Facebook
+
+    include footer

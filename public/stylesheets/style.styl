@@ -1,5 +1,85 @@
+// neat mixins
+@import 'nib'
+@import 'normalize'
+
+// them variables
+gray = #797775
+orange = #F58223
+bodyfont = "Open Sans", Helvetica, Arial, sans-serif
+
+// general style
+body, html
+  height 100%
+  width 100%
+
 body
-  padding: 50px
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
+  font-family bodyfont
+  font-size 15px
+  line-height 1.6
+  color #2e2b28
+  padding 0
+  margin 0
+  background #f7f7f7
+  background radial-gradient(ellipse at center, #f7f7f7 0%, #e0e0e0 100%)
+
+p
+  margin 0 0 30px
+  &.lead
+    font-weight 300
+    font-size 20px
+
 a
-  color: #00B7FF
+  color orange
+  text-decoration none
+
+  footer &
+    color gray
+
+  &:hover
+    color darken(orange, 20%)
+
+button, a.button
+  font-family bodyfont
+  display inline-block
+  padding 15px
+  font-size 15px
+  text-transform uppercase
+  letter-spacing 0.13em
+  background-color orange
+  color white
+  cursor pointer
+  border 0
+  border-bottom 3px solid darken(orange, 20%)
+
+  &:hover
+    background darken(orange, 5%)
+  .fa
+    margin-right 15px
+
+// components
+.c-container
+  margin 0 auto
+  padding 15px
+  width 100%
+  max-width 600px
+
+.c-modal
+  @extend .c-container
+  position relative
+  top 50%
+  transform translateY(-50%)
+  text-align center
+
+  &--left
+    text-align left
+
+.c-logo
+  display block
+  margin 0 auto
+
+  &--large
+    width 150px
+
+.c-result
+  width 100%
+  max-width 300px

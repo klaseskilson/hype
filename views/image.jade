@@ -1,16 +1,26 @@
 extends layout
 
 block content
-  section(ng-controller='ImageCtrl')
+  main.c-modal(ng-controller='ImageCtrl')
+    p.lead(ng-if='loading')
+      i.fa.fa-circle-o-notch.fa-spin.fa-lg
+      |  Laddar...
+
+    p(ng-if='!loading')
+      img.c-result(ng-src='{{img}}')
+
     p
-      span(ng-if='loading') loading...
-    | Welcome, #{name}!
+      button(ng-if='!loading', ng-click='saveImage()')
+        i.fa.fa-check-circle(ng-if='!upload_loading')
+        i.fa.fa-circle-o-notch.fa-spin(ng-if='upload_loading')
+        | {{savebutton}}
 
-    img(ng-if='img !== ""', src='{{img}}')
-
-    button(ng-if='img !== ""', ng-click='saveImage()') Save!
+    p(ng-if='!loading')
+      | Om du vill så kan du också&nbsp;
+      a(href='{{img}}') ladda ned
+      |  bilden.
 
     p
       a(href='/logout') Logga ut!
-    p
-      img(src=image)
+
+    include footer

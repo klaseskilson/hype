@@ -7,6 +7,7 @@ var site = require('./site');
 var image = require('./image');
 
 router.get('/', site.index);
+router.get('/privacy', site.privacy);
 router.get('/image', image.view);
 router.post('/image/create', image.create);
 router.post('/image/save', image.upload);

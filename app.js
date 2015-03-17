@@ -8,14 +8,26 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
-var passport = require('passport')
-  , FacebookStrategy = require('passport-facebook').Strategy;
+var passport = require('passport');
+var FacebookStrategy = require('passport-facebook').Strategy;
+var stylus = require('stylus');
+var nib = require('nib');
+var normalize = require('normalize');
 
 // load env vars
 require('dotenv').load();
 
 // load routes
 var routes = require('./routes');
+
+// custom stylus compilation function
+function compile(str, path) {
+  return stylus(str)
+    .set('filename', path)
+    .set('compress', true)
+    .include(normalize.path)
+    .use(nib());
+}
 
 // wooop
 var app = express();
@@ -25,9 +37,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
+app.use(favicon(__dirname + '/public/images/favicon.png'));
 app.use(logger('dev'));
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -36,7 +47,12 @@ app.use(session({secret: 'keyboard catz',
                  resave: true}));
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(require('stylus').middleware(path.join(__dirname, 'public')));
+// setup stylus with nib
+app.use(stylus.middleware({
+  src: path.join(__dirname, 'public'),
+  compile: compile
+}));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // passport functions
 passport.serializeUser(function(user, done) {
