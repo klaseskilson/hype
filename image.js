@@ -1,27 +1,46 @@
 var fs = require('fs');
 var gm = require('gm');
 var request = require('request');
+var session = require('express-session');
+var FormData = require('form-data');
+var https = require('https');
 
-exports.view = function(req, res){
+exports.view = function(req, res) {
+  if (!req.user)
+    res.redirect('/');
+
+  var image = 'https://graph.facebook.com/v2.2/' + req.user.id + '/picture?height=600&width=600';
+
+  console.log('logged in user: ', req.user);
+  console.log('user picture: ', image);
+  res.render('image', { name: req.user.displayName, image: image });
+};
+
+exports.create = function(req, res) {
   if (!req.user)
     res.redirect('/');
 
   console.log('logged in user: ', req.user);
-  res.render('loggedin', { name: req.user.displayName });
-};
-
-exports.create = function(req, res) {
   console.log('post data!: ', req.body);
+
+  // measure execution time
+  var end, start;
 
   var height = 600,
       width  = 600;
 
+  // start timer
+  start = new Date();
+
+  // prepare and download image
+  var image = 'https://graph.facebook.com/v2.2/' + req.user.id + '/picture?height=600&width=600';
+  var stream = request(image);
   // load image
-  var img = gm('assets/images/img.jpg')
+  var img = gm(stream, './tmp-img-'+req.user.id+'.jpg')
   .options({imageMagick: true});
 
   // crop image
-  img.size(function (err, size) {
+  img.size({bufferStream: true}, function (err, size) {
     if (!err)
     {
       var crop = {
@@ -30,29 +49,22 @@ exports.create = function(req, res) {
         h: size.height,
         w: size.width
       };
-      // console.log('prep crop', crop, size);
+      console.log('prep crop', crop, size);
 
       if (size.width < size.height)
       {
-        // console.log('taller');
+        // taller
         crop.h = size.width;
         crop.top = Math.floor((size.height - size.width) / 2);
       }
       else if (size.width > size.height)
       {
-        // console.log('wider');
+        // wider
         crop.w = size.height;
         crop.left = Math.floor((size.width - size.height) / 2);
       }
-      else
-      {
-        // console.log('equal');
-      }
-      // console.log('crop: ', crop);
 
       var offset = width / (crop.w/crop.left);
-
-      // console.log('offset', offset);
 
       img.crop(crop.w, crop.h, crop.left, crop.top)
       .resize(width)
@@ -64,17 +76,57 @@ exports.create = function(req, res) {
       // brighten!
       .recolor('2 0 0, 0 2 0, 0 0 2')
       // write MTD2015
-      .font('assets/fonts/open-sans/OpenSans-ExtraBold.ttf', 128.4)
+      .font('public/fonts/open-sans/OpenSans-ExtraBold.ttf', 128.4)
       .fill('#ffffffff')
       .drawText(offset + 2, height - 10, 'MTD2015')
 
-      .write('output/result.png', function (err) {
+      .write('public/images/output/' + req.user.id + '.png', function (err) {
+        end = new Date();
         if (!err)
-          console.log('done');
-        else
+        {
+          // save time for science
+          req.session.time = start.getTime();
+          console.log('done! execution took ' + (end.getTime() - start.getTime()) + ' ms.');
+        } else {
           console.log('An error occured!', err);
+        }
       });
     }
   });
+};
 
+exports.upload = function(req, res) {
+  if (!req.user)
+    res.redirect('/');
+
+  var filename = 'public/images/output/'+req.user.id + '.png'
+
+  var form = new FormData(); //Create multipart form
+  form.append('file', fs.createReadStream(filename)); //Put file
+  form.append('message', "Gaitooo"); //Put message
+  form.append('no_story', 'true'); // don't publish upload as a feed story
+
+  var options = {
+    method: 'post',
+    host: 'graph.facebook.com',
+    path: '/me/photos?access_token='+req.user.accessToken,
+    headers: form.getHeaders()
+  };
+
+  //Do POST request, callback for response
+  var request = https.request(options, function (res) {
+    console.log(res);
+
+    res.on('data', function(data) {
+      console.log('Data: ', data.id);
+    });
+  });
+
+  //Binds form to request
+  form.pipe(request);
+
+  //If anything goes wrong (request-wise not FB)
+  request.on('error', function (error) {
+    console.log(error);
+  });
 };

@@ -8,7 +8,8 @@ var image = require('./image');
 
 router.get('/', site.index);
 router.get('/image', image.view);
-router.post('/image', image.create);
+router.post('/image/create', image.create);
+router.post('/image/save', image.upload);
 
 // auth-related routes
 
